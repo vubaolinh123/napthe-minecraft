@@ -1,13 +1,16 @@
 'use client';
 
 import { useState } from 'react';
-import { startOfDay, endOfDay, subDays, startOfMonth, endOfMonth, startOfYear, endOfYear } from 'date-fns';
+import { startOfDay, endOfDay, subDays, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear } from 'date-fns';
 import type { PaymentType, TransactionStatus } from '@/types';
+
+export type ChartPeriod = 'day' | 'week' | 'month' | 'year';
 
 interface FilterBarProps {
     onDateChange: (start: Date | null, end: Date | null) => void;
     onPaymentTypeChange: (type: PaymentType | 'all') => void;
     onStatusChange: (status: TransactionStatus | 'all') => void;
+    onChartPeriodChange?: (period: ChartPeriod) => void;
     onReset: () => void;
     currentFilters: {
         startDate: Date | null;
@@ -15,22 +18,34 @@ interface FilterBarProps {
         paymentType: PaymentType | 'all';
         status: TransactionStatus | 'all';
     };
+    chartPeriod?: ChartPeriod;
 }
 
 const quickDateRanges = [
     { label: 'Hôm nay', getValue: () => ({ start: startOfDay(new Date()), end: endOfDay(new Date()) }) },
     { label: '7 ngày', getValue: () => ({ start: startOfDay(subDays(new Date(), 6)), end: endOfDay(new Date()) }) },
     { label: '30 ngày', getValue: () => ({ start: startOfDay(subDays(new Date(), 29)), end: endOfDay(new Date()) }) },
+    { label: 'Tuần này', getValue: () => ({ start: startOfWeek(new Date(), { weekStartsOn: 1 }), end: endOfWeek(new Date(), { weekStartsOn: 1 }) }) },
     { label: 'Tháng này', getValue: () => ({ start: startOfMonth(new Date()), end: endOfMonth(new Date()) }) },
     { label: 'Năm nay', getValue: () => ({ start: startOfYear(new Date()), end: endOfYear(new Date()) }) },
+    { label: 'Tất cả', getValue: () => ({ start: new Date('2025-01-01'), end: new Date() }) },
+];
+
+const chartPeriodOptions: { value: ChartPeriod; label: string }[] = [
+    { value: 'day', label: 'Theo ngày' },
+    { value: 'week', label: 'Theo tuần' },
+    { value: 'month', label: 'Theo tháng' },
+    { value: 'year', label: 'Theo năm' },
 ];
 
 export default function FilterBar({
     onDateChange,
     onPaymentTypeChange,
     onStatusChange,
+    onChartPeriodChange,
     onReset,
     currentFilters,
+    chartPeriod = 'month',
 }: FilterBarProps) {
     const [showCustomDate, setShowCustomDate] = useState(false);
     const [customStart, setCustomStart] = useState('');
@@ -103,8 +118,29 @@ export default function FilterBar({
                 </div>
             )}
 
-            {/* Type & Status Filters */}
+            {/* Chart Period & Type/Status Filters */}
             <div className="flex flex-wrap gap-4 pt-3 border-t border-white/10">
+                {/* Chart Period Selector */}
+                {onChartPeriodChange && (
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm text-gray-400">📊 Biểu đồ:</span>
+                        <div className="flex gap-1 bg-white/5 p-1 rounded-lg">
+                            {chartPeriodOptions.map((option) => (
+                                <button
+                                    key={option.value}
+                                    onClick={() => onChartPeriodChange(option.value)}
+                                    className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${chartPeriod === option.value
+                                            ? 'bg-emerald-500 text-white'
+                                            : 'text-gray-400 hover:text-white hover:bg-white/10'
+                                        }`}
+                                >
+                                    {option.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 {/* Payment Type */}
                 <div className="flex items-center gap-2">
                     <span className="text-sm text-gray-400">💳 Loại:</span>

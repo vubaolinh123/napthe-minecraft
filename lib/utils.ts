@@ -138,16 +138,31 @@ export function getDateRangePreset(preset: string): { start: Date; end: Date } {
 /**
  * Group transactions by date for chart
  */
-export function groupByDate(transactions: Transaction[], groupBy: 'day' | 'month' = 'day') {
+export function groupByDate(transactions: Transaction[], groupBy: 'day' | 'week' | 'month' | 'year' = 'month') {
     const grouped = new Map<string, { revenue: number; count: number; byType: Record<PaymentType, number> }>();
 
     transactions
         .filter(tx => tx.status === 'success')
         .forEach(tx => {
             const date = parseISO(tx.createdAt);
-            const key = groupBy === 'month'
-                ? format(date, 'yyyy-MM')
-                : format(date, 'yyyy-MM-dd');
+            let key: string;
+
+            switch (groupBy) {
+                case 'day':
+                    key = format(date, 'yyyy-MM-dd');
+                    break;
+                case 'week':
+                    key = format(date, "yyyy-'W'ww");
+                    break;
+                case 'month':
+                    key = format(date, 'yyyy-MM');
+                    break;
+                case 'year':
+                    key = format(date, 'yyyy');
+                    break;
+                default:
+                    key = format(date, 'yyyy-MM');
+            }
 
             if (!grouped.has(key)) {
                 grouped.set(key, {

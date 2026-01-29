@@ -1,8 +1,6 @@
 /**
  * Enhanced script to generate fake transaction data for Minecraft top-up statistics
- * - 50+ records per day from Jan 2025 to Jan 2026
- * - Diverse anime + Vietnamese player names (200+ unique combinations)
- * - Monthly revenue targets based on seasonal patterns
+ * Monthly revenue targets based on seasonal patterns
  * Run with: node scripts/generateData.js
  */
 
@@ -10,79 +8,35 @@ const fs = require('fs');
 const path = require('path');
 
 // ============================================
-// PLAYER NAME GENERATION (200+ unique names)
+// PLAYER NAME GENERATION
 // ============================================
-
-// Vietnamese first names
 const vnFirstNames = ['Minh', 'Hoang', 'Anh', 'Hung', 'Duc', 'Tuan', 'Long', 'Phong', 'Khang', 'Bao', 
   'Nam', 'Dung', 'Tai', 'Kien', 'Thang', 'Hieu', 'Vinh', 'Quang', 'Hai', 'Cuong',
   'Dat', 'Huy', 'Trung', 'Thanh', 'Son', 'Duong', 'Nhat', 'Quan', 'Thinh', 'Viet'];
 
-// Japanese/Anime names  
 const animeNames = ['Kirito', 'Naruto', 'Sasuke', 'Goku', 'Vegeta', 'Luffy', 'Zoro', 'Ichigo', 
   'Natsu', 'Eren', 'Levi', 'Mikasa', 'Kaneki', 'Tanjiro', 'Todoroki', 'Deku', 'Bakugo',
   'Gojo', 'Sukuna', 'Itachi', 'Kakashi', 'Madara', 'Rimuru', 'Ainz', 'Saitama', 'Genos',
   'Light', 'Lelouch', 'Edward', 'Mustang', 'Spike', 'Gintoki', 'Roronoa', 'Shanks',
   'Yagami', 'Asta', 'Yuno', 'Tatsumaki', 'Fubuki', 'Nezuko', 'Zenitsu', 'Inosuke'];
 
-// Gaming/Meme suffixes
 const suffixes = ['Pro', 'Gaming', 'MC', 'VN', 'PVP', 'HD', 'YT', 'TTV', 'XD', 'OP', 
-  'Noob', 'King', 'Boss', 'God', 'Legend', 'Master', 'Sama', 'Kun', 'Chan', 'San',
-  'X', 'Z', 'Alpha', 'Omega', 'Prime', 'Ultra', 'Mega', 'Gamer', 'Streamer', 'NB'];
+  'Noob', 'King', 'Boss', 'God', 'Legend', 'Master', 'Sama', 'Kun', 'Chan', 'San'];
 
-// Number variations
-const numbers = ['', '01', '07', '69', '96', '123', '456', '789', '99', '00', '2k', '3k', 'x1', 'x2'];
-
-// Separators for name parts
-const separators = ['_', '', '.', 'x', 'X'];
-
-// Generate unique player names pool (200+)
 function generateNamePool() {
   const names = new Set();
-  
-  // Pattern 1: Anime + VN name
   animeNames.forEach(anime => {
-    vnFirstNames.slice(0, 15).forEach(vn => {
-      names.add(`${anime}_${vn}`);
-    });
+    vnFirstNames.slice(0, 10).forEach(vn => names.add(`${anime}_${vn}`));
   });
-  
-  // Pattern 2: VN + Anime
   vnFirstNames.slice(0, 10).forEach(vn => {
-    animeNames.slice(0, 20).forEach(anime => {
-      names.add(`${vn}${anime}`);
-    });
+    animeNames.slice(0, 20).forEach(anime => names.add(`${vn}${anime}`));
   });
-  
-  // Pattern 3: Anime + Suffix
   animeNames.forEach(anime => {
-    suffixes.slice(0, 15).forEach(suffix => {
-      names.add(`${anime}${suffix}`);
-    });
+    suffixes.forEach(suffix => names.add(`${anime}${suffix}`));
   });
-  
-  // Pattern 4: VN + Suffix + Number
   vnFirstNames.forEach(vn => {
-    suffixes.slice(0, 10).forEach(suffix => {
-      numbers.slice(0, 5).forEach(num => {
-        names.add(`${vn}_${suffix}${num}`);
-      });
-    });
+    suffixes.slice(0, 10).forEach(suffix => names.add(`${vn}_${suffix}`));
   });
-  
-  // Pattern 5: Anime x Anime mashups
-  for (let i = 0; i < animeNames.length - 1; i++) {
-    names.add(`${animeNames[i]}x${animeNames[i+1]}`);
-  }
-  
-  // Pattern 6: VN + Number + Suffix
-  vnFirstNames.slice(0, 15).forEach(vn => {
-    numbers.slice(1, 6).forEach(num => {
-      names.add(`${vn}${num}Gaming`);
-      names.add(`${vn}${num}Pro`);
-    });
-  });
-
   return Array.from(names);
 }
 
@@ -90,52 +44,27 @@ const NAME_POOL = generateNamePool();
 console.log(`📝 Generated ${NAME_POOL.length} unique player names`);
 
 // ============================================
-// PAYMENT CONFIGURATION
+// AMOUNTS & PROVIDERS
 // ============================================
+const phoneProviders = ['Viettel', 'Mobifone', 'Vinaphone', 'Vietnamobile'];
+const gameProviders = ['Garena', 'VTC Gate', 'Zing', 'FPT', 'Gcoin', 'Steam'];
+const bankProviders = ['VCB', 'TCB', 'MB Bank', 'ACB', 'BIDV', 'VPBank', 'Momo', 'ZaloPay', 'VNPay'];
 
-// Card amounts - must be even for phone/game cards
-const phoneCardAmounts = [10000, 20000, 30000, 50000, 100000, 200000, 500000, 1000000];
-const gameCardAmounts = [10000, 20000, 50000, 100000, 200000, 500000, 1000000, 2000000];
-
-// Bank transfer amounts - can be any value including odd
-const bankSmallAmounts = [15000, 25000, 35000, 45000, 55000, 65000, 75000, 85000, 95000];
-const bankMediumAmounts = [100000, 150000, 200000, 250000, 300000, 350000, 400000, 450000, 500000];
-const bankLargeAmounts = [500000, 750000, 1000000, 1500000, 2000000, 2500000, 3000000, 5000000];
-
-// Providers by type
-const phoneProviders = ['Viettel', 'Mobifone', 'Vinaphone', 'Vietnamobile', 'Gmobile'];
-const gameProviders = ['Garena', 'VTC Gate', 'Zing', 'FPT', 'ViettelPay', 'Gcoin', 'Steam'];
-const bankProviders = ['VCB', 'TCB', 'MB Bank', 'ACB', 'BIDV', 'VPBank', 'TPBank', 'Momo', 'ZaloPay', 'VNPay', 'ShopeePay'];
-
-// ============================================
 // MONTHLY REVENUE TARGETS (in VND)
-// ============================================
 const MONTHLY_REVENUE_TARGETS = {
   1: { min: 20000000, max: 30000000 },   // Jan: 20-30M
-  2: { min: 22000000, max: 28000000 },   // Feb: 22-28M (Lunar New Year dip)
+  2: { min: 22000000, max: 28000000 },   // Feb: 22-28M
   3: { min: 25000000, max: 32000000 },   // Mar: 25-32M
-  4: { min: 40000000, max: 50000000 },   // Apr: 40-50M (summer starts)
+  4: { min: 40000000, max: 50000000 },   // Apr: 40-50M
   5: { min: 45000000, max: 55000000 },   // May: 45-55M
-  6: { min: 50000000, max: 60000000 },   // Jun: 50-60M (summer peak)
-  7: { min: 55000000, max: 65000000 },   // Jul: 55-65M (peak summer vacation)
-  8: { min: 50000000, max: 60000000 },   // Aug: 50-60M (end summer)
-  9: { min: 35000000, max: 42000000 },   // Sep: 35-42M (back to school)
-  10: { min: 28000000, max: 35000000 },  // Oct: 28-35M
-  11: { min: 20000000, max: 28000000 },  // Nov: 20-28M
-  12: { min: 15000000, max: 25000000 },  // Dec: 15-25M (year end)
+  6: { min: 50000000, max: 60000000 },   // Jun: 50-60M
+  7: { min: 55000000, max: 65000000 },   // Jul: 55-65M
+  8: { min: 50000000, max: 60000000 },   // Aug: 50-60M
+  9: { min: 30000000, max: 38000000 },   // Sep: 30-38M
+  10: { min: 25000000, max: 32000000 },  // Oct: 25-32M
+  11: { min: 18000000, max: 25000000 },  // Nov: 18-25M
+  12: { min: 15000000, max: 22000000 },  // Dec: 15-22M
 };
-
-// ============================================
-// UTILITY FUNCTIONS
-// ============================================
-
-function generateRandomId() {
-  return 'TXN' + Math.random().toString(36).substring(2, 10).toUpperCase();
-}
-
-function generatePlayerId() {
-  return 'MC' + Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
-}
 
 function getRandomElement(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
@@ -149,194 +78,164 @@ function getDaysInMonth(year, month) {
   return new Date(year, month, 0).getDate();
 }
 
-// Generate amount based on type and target average
-function generateAmount(type, targetAvg) {
-  // Adjust amount distribution based on target average per transaction
-  let amounts;
-  
-  if (type === 'phone_card') {
-    amounts = phoneCardAmounts;
-  } else if (type === 'game_card') {
-    amounts = gameCardAmounts;
-  } else {
-    // Bank: mix of small, medium, large based on target
-    if (targetAvg < 100000) {
-      amounts = [...bankSmallAmounts, ...bankMediumAmounts.slice(0, 3)];
-    } else if (targetAvg < 300000) {
-      amounts = [...bankMediumAmounts, ...bankLargeAmounts.slice(0, 3)];
-    } else {
-      amounts = [...bankMediumAmounts, ...bankLargeAmounts];
-    }
-  }
-  
-  return getRandomElement(amounts);
+function generateRandomId() {
+  return 'TXN' + Math.random().toString(36).substring(2, 10).toUpperCase();
+}
+
+function generatePlayerId() {
+  return 'MC' + Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
 }
 
 // ============================================
-// TRANSACTION GENERATION BY DAY
+// MAIN GENERATION - Revenue-controlled approach
 // ============================================
-
-function generateDayTransactions(date, targetRevenue, minTransactions = 50) {
+function generateMonthData(year, month, targetRevenue) {
   const transactions = [];
-  let currentRevenue = 0;
-  const targetAvg = targetRevenue / minTransactions;
+  const daysInMonth = getDaysInMonth(year, month);
   
-  // Generate at least minTransactions
-  while (transactions.length < minTransactions || currentRevenue < targetRevenue * 0.9) {
-    // Prevent infinite loop
-    if (transactions.length > minTransactions * 3) break;
-    
-    // Payment type distribution
-    const typeRandom = Math.random();
-    let type, provider, amount;
-    
-    if (typeRandom < 0.40) {
-      type = 'phone_card';
-      provider = getRandomElement(phoneProviders);
-      amount = getRandomElement(phoneCardAmounts);
-    } else if (typeRandom < 0.70) {
-      type = 'game_card';
-      provider = getRandomElement(gameProviders);
-      amount = getRandomElement(gameCardAmounts);
-    } else {
-      type = 'bank_transfer';
-      provider = getRandomElement(bankProviders);
-      amount = generateAmount(type, targetAvg);
-    }
-    
-    // Status distribution: 87% success, 9% pending, 4% failed
-    const statusRandom = Math.random();
-    let status;
-    if (statusRandom < 0.87) {
-      status = 'success';
-      currentRevenue += amount;
-    } else if (statusRandom < 0.96) {
-      status = 'pending';
-    } else {
-      status = 'failed';
-    }
-    
-    // Random time during the day (more active 9AM-11PM)
-    const hour = getRandomInRange(0, 23);
-    const minute = getRandomInRange(0, 59);
-    const second = getRandomInRange(0, 59);
-    const txDate = new Date(date);
-    txDate.setHours(hour, minute, second, getRandomInRange(0, 999));
-    
-    transactions.push({
-      id: generateRandomId(),
-      playerName: getRandomElement(NAME_POOL),
-      playerId: generatePlayerId(),
-      amount,
-      type,
-      provider,
-      status,
-      createdAt: txDate.toISOString(),
-    });
+  // Calculate average amount per successful transaction to hit target
+  // Aim for ~50-70 transactions per day, ~85% success rate
+  const avgTxPerDay = 60;
+  const successRate = 0.85;
+  const totalExpectedSuccessTx = daysInMonth * avgTxPerDay * successRate;
+  const targetAvgAmount = targetRevenue / totalExpectedSuccessTx;
+  
+  // Amount pools based on target average
+  let amountsPool;
+  if (targetAvgAmount < 15000) {
+    amountsPool = [10000, 10000, 10000, 20000, 20000, 30000]; // Heavy on small
+  } else if (targetAvgAmount < 25000) {
+    amountsPool = [10000, 20000, 20000, 30000, 50000]; 
+  } else if (targetAvgAmount < 40000) {
+    amountsPool = [20000, 30000, 50000, 50000, 100000];
+  } else {
+    amountsPool = [30000, 50000, 100000, 100000, 200000];
   }
   
-  return transactions;
-}
-
-// ============================================
-// MAIN GENERATION FUNCTION
-// ============================================
-
-function generateAllTransactions() {
-  const allTransactions = [];
-  const startDate = new Date('2025-01-01');
-  const endDate = new Date('2026-01-29');
+  // Bank amounts (can be odd)
+  const bankPool = [15000, 25000, 35000, 50000, 75000, 100000, 150000];
   
-  let currentDate = new Date(startDate);
-  let monthlyStats = {};
+  let monthRevenue = 0;
   
-  while (currentDate <= endDate) {
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth() + 1;
-    const day = currentDate.getDate();
-    const daysInMonth = getDaysInMonth(year, month);
+  for (let day = 1; day <= daysInMonth; day++) {
+    const date = new Date(year, month - 1, day);
+    const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+    const txCount = isWeekend ? getRandomInRange(55, 75) : getRandomInRange(45, 65);
     
-    // Get monthly target
-    const monthKey = year === 2026 ? 1 : month; // Use January target for 2026
-    const monthTarget = MONTHLY_REVENUE_TARGETS[monthKey];
-    const monthRevenue = getRandomInRange(monthTarget.min, monthTarget.max);
+    // Calculate remaining target
+    const remainingDays = daysInMonth - day + 1;
+    const remainingTarget = targetRevenue - monthRevenue;
+    const dailyTarget = remainingTarget / remainingDays;
+    let dailyRevenue = 0;
     
-    // Calculate daily target (with some variation)
-    const dailyBaseTarget = monthRevenue / daysInMonth;
-    const dailyVariation = dailyBaseTarget * 0.3; // 30% variation
-    const dailyTarget = dailyBaseTarget + getRandomInRange(-dailyVariation, dailyVariation);
-    
-    // Weekend bonus (slightly more transactions)
-    const dayOfWeek = currentDate.getDay();
-    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-    const minTx = isWeekend ? 60 : 50;
-    
-    // Generate day's transactions
-    const dayTransactions = generateDayTransactions(currentDate, dailyTarget, minTx);
-    allTransactions.push(...dayTransactions);
-    
-    // Track monthly stats
-    const monthYearKey = `${year}-${month.toString().padStart(2, '0')}`;
-    if (!monthlyStats[monthYearKey]) {
-      monthlyStats[monthYearKey] = { count: 0, revenue: 0 };
-    }
-    dayTransactions.forEach(tx => {
-      if (tx.status === 'success') {
-        monthlyStats[monthYearKey].revenue += tx.amount;
+    for (let i = 0; i < txCount; i++) {
+      // Payment type
+      const typeRnd = Math.random();
+      let type, provider, amount;
+      
+      if (typeRnd < 0.45) {
+        type = 'phone_card';
+        provider = getRandomElement(phoneProviders);
+        amount = getRandomElement(amountsPool);
+      } else if (typeRnd < 0.75) {
+        type = 'game_card';
+        provider = getRandomElement(gameProviders);
+        amount = getRandomElement(amountsPool);
+      } else {
+        type = 'bank_transfer';
+        provider = getRandomElement(bankProviders);
+        amount = getRandomElement(bankPool);
       }
-      monthlyStats[monthYearKey].count++;
-    });
-    
-    // Move to next day
-    currentDate.setDate(currentDate.getDate() + 1);
+      
+      // Adjust amount if we're approaching target
+      if (dailyRevenue > dailyTarget * 0.8 && Math.random() > 0.3) {
+        // Reduce amount for remaining transactions
+        amount = Math.min(amount, 20000);
+      }
+      
+      // Status
+      const statusRnd = Math.random();
+      let status;
+      if (statusRnd < 0.85) {
+        status = 'success';
+        // Only add to revenue if success
+        dailyRevenue += amount;
+        monthRevenue += amount;
+      } else if (statusRnd < 0.95) {
+        status = 'pending';
+      } else {
+        status = 'failed';
+      }
+      
+      // Random time
+      const hour = getRandomInRange(7, 23);
+      const txDate = new Date(year, month - 1, day, hour, getRandomInRange(0, 59), getRandomInRange(0, 59));
+      
+      transactions.push({
+        id: generateRandomId(),
+        playerName: getRandomElement(NAME_POOL),
+        playerId: generatePlayerId(),
+        amount,
+        type,
+        provider,
+        status,
+        createdAt: txDate.toISOString(),
+      });
+    }
   }
   
-  // Sort by date descending
-  allTransactions.sort((a, b) => 
-    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
-  
-  return { transactions: allTransactions, monthlyStats };
+  return { transactions, actualRevenue: monthRevenue };
 }
-
-// ============================================
-// RUN GENERATION
-// ============================================
 
 function main() {
-  console.log('🎮 Generating enhanced transaction data...');
-  console.log('📅 Date range: Jan 2025 - Jan 2026');
-  console.log('📊 Target: 50+ transactions per day\n');
+  console.log('🎮 Generating transaction data with revenue targets...\n');
   
-  const { transactions, monthlyStats } = generateAllTransactions();
+  const allTransactions = [];
+  const monthlyStats = {};
   
-  // Ensure data directory exists
-  const dataDir = path.join(__dirname, '..', 'data');
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
+  const months = [
+    { year: 2025, month: 1 }, { year: 2025, month: 2 }, { year: 2025, month: 3 },
+    { year: 2025, month: 4 }, { year: 2025, month: 5 }, { year: 2025, month: 6 },
+    { year: 2025, month: 7 }, { year: 2025, month: 8 }, { year: 2025, month: 9 },
+    { year: 2025, month: 10 }, { year: 2025, month: 11 }, { year: 2025, month: 12 },
+    { year: 2026, month: 1 },
+  ];
+  
+  for (const { year, month } of months) {
+    const targetKey = year === 2026 ? 1 : month;
+    const target = MONTHLY_REVENUE_TARGETS[targetKey];
+    const targetRevenue = getRandomInRange(target.min, target.max);
+    
+    const { transactions, actualRevenue } = generateMonthData(year, month, targetRevenue);
+    allTransactions.push(...transactions);
+    
+    const key = `${year}-${month.toString().padStart(2, '0')}`;
+    monthlyStats[key] = { target: targetRevenue, actual: actualRevenue, count: transactions.length };
   }
-
-  // Write to JSON file
+  
+  // Sort descending by date
+  allTransactions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  
+  // Save
+  const dataDir = path.join(__dirname, '..', 'data');
+  if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+  
   const outputPath = path.join(dataDir, 'transactions.json');
-  fs.writeFileSync(outputPath, JSON.stringify(transactions, null, 2), 'utf-8');
-
-  // Print summary
-  const successTx = transactions.filter(t => t.status === 'success');
+  fs.writeFileSync(outputPath, JSON.stringify(allTransactions, null, 2), 'utf-8');
+  
+  // Summary
+  const successTx = allTransactions.filter(t => t.status === 'success');
   const totalRevenue = successTx.reduce((sum, t) => sum + t.amount, 0);
   
   console.log('✅ Generated successfully!');
   console.log(`📁 Output: ${outputPath}`);
-  console.log(`\n📊 Overall Summary:`);
-  console.log(`   Total records: ${transactions.length.toLocaleString('vi-VN')}`);
-  console.log(`   Success: ${successTx.length.toLocaleString('vi-VN')}`);
-  console.log(`   Total Revenue: ${totalRevenue.toLocaleString('vi-VN')} VND`);
+  console.log(`\n📊 Summary: ${allTransactions.length.toLocaleString()} records, ${(totalRevenue/1000000).toFixed(1)}M VND total\n`);
   
-  console.log('\n📈 Monthly Revenue Breakdown:');
-  Object.entries(monthlyStats)
-    .sort((a, b) => a[0].localeCompare(b[0]))
-    .forEach(([month, stats]) => {
-      console.log(`   ${month}: ${stats.revenue.toLocaleString('vi-VN')} VND (${stats.count.toLocaleString('vi-VN')} tx)`);
-    });
+  console.log('📈 Monthly Breakdown:');
+  Object.entries(monthlyStats).sort((a, b) => a[0].localeCompare(b[0])).forEach(([m, s]) => {
+    const accuracy = ((s.actual / s.target) * 100).toFixed(0);
+    console.log(`   ${m}: ${(s.actual/1000000).toFixed(1)}M / ${(s.target/1000000).toFixed(1)}M target (${accuracy}%) - ${s.count} tx`);
+  });
 }
 
 main();

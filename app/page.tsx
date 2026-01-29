@@ -1,12 +1,13 @@
 'use client';
 
-import { Suspense, useMemo } from 'react';
+import { Suspense, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import transactionsData from '@/data/transactions.json';
 import { useTransactions } from '@/hooks/useTransactions';
 import { usePagination } from '@/hooks/usePagination';
 import { groupByDate, calculateMonthlyProfit, formatCurrency } from '@/lib/utils';
 import type { Transaction } from '@/types';
+import type { ChartPeriod } from '@/components/FilterBar';
 
 // Dynamic imports for code splitting
 const DashboardHeader = dynamic(() => import('@/components/DashboardHeader'), {
@@ -37,6 +38,7 @@ const TransactionTable = dynamic(() => import('@/components/TransactionTable'), 
 
 export default function Dashboard() {
   const transactions = transactionsData as Transaction[];
+  const [chartPeriod, setChartPeriod] = useState<ChartPeriod>('month');
 
   const {
     filteredTransactions,
@@ -53,10 +55,10 @@ export default function Dashboard() {
     initialItemsPerPage: 10,
   });
 
-  // Chart data
+  // Chart data based on selected period
   const revenueChartData = useMemo(
-    () => groupByDate(filteredTransactions, 'month'),
-    [filteredTransactions]
+    () => groupByDate(filteredTransactions, chartPeriod),
+    [filteredTransactions, chartPeriod]
   );
 
   const profitChartData = useMemo(
@@ -80,14 +82,16 @@ export default function Dashboard() {
         <DashboardHeader />
       </Suspense>
 
-      {/* Filter Bar */}
+      {/* Filter Bar with Chart Period */}
       <Suspense fallback={<div className="glass-card h-32 animate-pulse mb-6" />}>
         <FilterBar
           currentFilters={filters}
           onDateChange={setDateRange}
           onPaymentTypeChange={setPaymentType}
           onStatusChange={setStatus}
+          onChartPeriodChange={setChartPeriod}
           onReset={resetFilters}
+          chartPeriod={chartPeriod}
         />
       </Suspense>
 
