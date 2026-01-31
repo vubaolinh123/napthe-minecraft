@@ -65,26 +65,26 @@ const bankProviders = ['VCB', 'TCB', 'MB Bank', 'ACB', 'BIDV', 'VPBank', 'Momo',
 // Nov 2025+: costs 47M
 
 const MONTHLY_DATA = {
-  // Phase 1: costs 28M (VPS 12M)
+  // Phase 1: costs 28M (VPS 12M) - LOSS months unchanged
   '2025-01': { revenue: 0, costs: 28000000, targetProfit: -28000000 },         // No revenue = -28M loss
   '2025-02': { revenue: 0, costs: 28000000, targetProfit: -28000000 },         // No revenue = -28M loss
   '2025-03': { revenue: 20000000, costs: 28000000, targetProfit: -8000000 },   // ~20M revenue = -8M loss
   '2025-04': { revenue: 0, costs: 28000000, targetProfit: -28000000 },         // No revenue = -28M loss
   
-  // Phase 2: costs 28M (same as phase 1)
-  '2025-05': { revenue: 35000000, costs: 28000000, targetProfit: 7000000 },    // 35M revenue = 7M profit
+  // Phase 2: costs 28M - Profitable months get +5M
+  '2025-05': { revenue: 40000000, costs: 28000000, targetProfit: 12000000 },   // 7M+5M = 12M profit
   
-  // Phase 3: costs 37M (VPS 21M)
-  '2025-06': { revenue: 47000000, costs: 37000000, targetProfit: 10000000 },   // 10M profit
-  '2025-07': { revenue: 50000000, costs: 37000000, targetProfit: 13000000 },   // 13M profit
-  '2025-08': { revenue: 51000000, costs: 37000000, targetProfit: 14000000 },   // 14M profit
-  '2025-09': { revenue: 55000000, costs: 37000000, targetProfit: 18000000 },   // 18M profit
-  '2025-10': { revenue: 52000000, costs: 37000000, targetProfit: 15000000 },   // 15M profit
+  // Phase 3: costs 37M (VPS 21M) - Profitable months get +5M
+  '2025-06': { revenue: 52000000, costs: 37000000, targetProfit: 15000000 },   // 10M+5M = 15M profit
+  '2025-07': { revenue: 55000000, costs: 37000000, targetProfit: 18000000 },   // 13M+5M = 18M profit
+  '2025-08': { revenue: 56000000, costs: 37000000, targetProfit: 19000000 },   // 14M+5M = 19M profit
+  '2025-09': { revenue: 60000000, costs: 37000000, targetProfit: 23000000 },   // 18M+5M = 23M profit
+  '2025-10': { revenue: 57000000, costs: 37000000, targetProfit: 20000000 },   // 15M+5M = 20M profit
   
-  // Phase 4: costs 47M (VPS 25M, Admin 9M)
-  '2025-11': { revenue: 67000000, costs: 47000000, targetProfit: 20000000 },   // 20M profit
-  '2025-12': { revenue: 69000000, costs: 47000000, targetProfit: 22000000 },   // 22M profit
-  '2026-01': { revenue: 72000000, costs: 47000000, targetProfit: 25000000 },   // 25M profit
+  // Phase 4: costs 47M (VPS 25M, Admin 9M) - Profitable months get +5M
+  '2025-11': { revenue: 72000000, costs: 47000000, targetProfit: 25000000 },   // 20M+5M = 25M profit
+  '2025-12': { revenue: 74000000, costs: 47000000, targetProfit: 27000000 },   // 22M+5M = 27M profit
+  '2026-01': { revenue: 77000000, costs: 47000000, targetProfit: 30000000 },   // 25M+5M = 30M profit
 };
 
 // Cost breakdown by phase
