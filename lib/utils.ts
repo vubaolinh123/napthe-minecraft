@@ -191,7 +191,58 @@ export function groupByDate(transactions: Transaction[], groupBy: 'day' | 'week'
 }
 
 /**
- * Calculate monthly profit data
+ * Calculate monthly profit/loss with expenses data
+ */
+export interface MonthlyProfitLoss {
+    month: string;
+    revenue: number;
+    costs: number;
+    profit: number;
+    isProfit: boolean;
+    growth: number;
+}
+
+export function calculateMonthlyProfitLoss(
+    transactions: Transaction[],
+    expenses: Array<{ month: string; costs: { total: number } }>
+): MonthlyProfitLoss[] {
+    const revenueByMonth = new Map<string, number>();
+
+    transactions
+        .filter(tx => tx.status === 'success')
+        .forEach(tx => {
+            const date = parseISO(tx.createdAt);
+            const key = format(date, 'yyyy-MM');
+            revenueByMonth.set(key, (revenueByMonth.get(key) || 0) + tx.amount);
+        });
+
+    const result: MonthlyProfitLoss[] = [];
+
+    expenses.forEach((exp, index) => {
+        const revenue = revenueByMonth.get(exp.month) || 0;
+        const costs = exp.costs.total;
+        const profit = revenue - costs;
+
+        const prevMonth = result[index - 1];
+        const growth = prevMonth && prevMonth.revenue > 0
+            ? ((revenue - prevMonth.revenue) / prevMonth.revenue) * 100
+            : 0;
+
+        result.push({
+            month: exp.month,
+            revenue,
+            costs,
+            profit,
+            isProfit: profit >= 0,
+            growth: Math.round(growth * 10) / 10,
+        });
+    });
+
+    return result;
+}
+
+/**
+ * Legacy function for backward compatibility
  */
 export function calculateMonthlyProfit(transactions: Transaction[]) {
     const grouped = new Map<string, { revenue: number; profit: number }>();
@@ -235,4 +286,15 @@ export function calculateMonthlyProfit(transactions: Transaction[]) {
  */
 export function truncate(str: string, length: number): string {
     return str.length > length ? str.slice(0, length) + '...' : str;
+}
+
+/**
+ * Format profit/loss with color indicator
+ */
+export function formatProfitLoss(amount: number): { text: string; isProfit: boolean } {
+    const formatted = formatCurrency(Math.abs(amount));
+    return {
+        text: amount >= 0 ? `+${formatted}` : `-${formatted}`,
+        isProfit: amount >= 0,
+    };
 }

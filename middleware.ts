@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 // Protected routes that require authentication
-const protectedRoutes = ['/'];
+const protectedRoutes = ['/', '/expenses'];
 const publicRoutes = ['/login'];
 
 export function middleware(request: NextRequest) {
@@ -30,5 +30,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ['/', '/login'],
+    matcher: ['/', '/login', '/expenses'],
 };

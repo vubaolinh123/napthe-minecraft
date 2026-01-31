@@ -2,14 +2,16 @@
 
 import { Suspense, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
 import transactionsData from '@/data/transactions.json';
+import expensesData from '@/data/expenses.json';
 import { useTransactions } from '@/hooks/useTransactions';
 import { usePagination } from '@/hooks/usePagination';
-import { groupByDate, calculateMonthlyProfit, formatCurrency } from '@/lib/utils';
-import type { Transaction } from '@/types';
+import { groupByDate, formatCurrency } from '@/lib/utils';
+import type { Transaction, MonthlyExpense } from '@/types';
 import type { ChartPeriod } from '@/components/FilterBar';
 
-// Dynamic imports for code splitting
+// Dynamic imports
 const DashboardHeader = dynamic(() => import('@/components/DashboardHeader'), {
   loading: () => <div className="glass-card h-20 animate-pulse mb-6" />,
 });
@@ -38,6 +40,7 @@ const TransactionTable = dynamic(() => import('@/components/TransactionTable'), 
 
 export default function Dashboard() {
   const transactions = transactionsData as Transaction[];
+  const expenses = expensesData as MonthlyExpense[];
   const [chartPeriod, setChartPeriod] = useState<ChartPeriod>('month');
 
   const {
@@ -55,26 +58,22 @@ export default function Dashboard() {
     initialItemsPerPage: 10,
   });
 
-  // Chart data based on selected period
+  // Chart data
   const revenueChartData = useMemo(
     () => groupByDate(filteredTransactions, chartPeriod),
     [filteredTransactions, chartPeriod]
   );
 
-  const profitChartData = useMemo(
-    () => calculateMonthlyProfit(filteredTransactions),
-    [filteredTransactions]
-  );
-
-  // Calculate previous month growth for stat cards
-  const monthlyGrowth = useMemo(() => {
-    if (profitChartData.length < 2) return undefined;
-    const lastMonth = profitChartData[profitChartData.length - 1];
+  // Overall profit/loss summary
+  const overallSummary = useMemo(() => {
+    const totalRevenue = expenses.reduce((sum, e) => sum + e.revenue, 0);
+    const totalCosts = expenses.reduce((sum, e) => sum + e.costs.total, 0);
     return {
-      value: Math.abs(lastMonth.growth),
-      isPositive: lastMonth.growth >= 0,
+      totalRevenue,
+      totalCosts,
+      netProfit: totalRevenue - totalCosts,
     };
-  }, [profitChartData]);
+  }, [expenses]);
 
   return (
     <main className="min-h-screen p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
@@ -82,7 +81,17 @@ export default function Dashboard() {
         <DashboardHeader />
       </Suspense>
 
-      {/* Filter Bar with Chart Period */}
+      {/* Navigation */}
+      <div className="flex items-center gap-4 mb-4">
+        <Link
+          href="/expenses"
+          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 hover:text-amber-300 transition-colors border border-amber-500/20"
+        >
+          💰 Xem Chi phí & Lãi/Lỗ
+        </Link>
+      </div>
+
+      {/* Filter Bar */}
       <Suspense fallback={<div className="glass-card h-32 animate-pulse mb-6" />}>
         <FilterBar
           currentFilters={filters}
@@ -103,8 +112,31 @@ export default function Dashboard() {
             value={stats.totalRevenue}
             isCurrency
             icon={<span className="text-xl">💰</span>}
-            trend={monthlyGrowth}
             subtitle="Từ giao dịch thành công"
+          />
+        </Suspense>
+
+        <Suspense fallback={<div className="glass-card h-32 animate-pulse" />}>
+          <StatCard
+            title="Tổng Chi Phí"
+            value={overallSummary.totalCosts}
+            isCurrency
+            icon={<span className="text-xl">💸</span>}
+            subtitle="Chi phí vận hành"
+          />
+        </Suspense>
+
+        <Suspense fallback={<div className="glass-card h-32 animate-pulse" />}>
+          <StatCard
+            title="Lãi/Lỗ Ròng"
+            value={overallSummary.netProfit}
+            isCurrency
+            icon={<span className="text-xl">{overallSummary.netProfit >= 0 ? '📈' : '📉'}</span>}
+            subtitle={overallSummary.netProfit >= 0 ? 'Lãi' : 'Lỗ'}
+            trend={{
+              value: Math.abs(Math.round((overallSummary.netProfit / overallSummary.totalCosts) * 100)),
+              isPositive: overallSummary.netProfit >= 0,
+            }}
           />
         </Suspense>
 
@@ -116,26 +148,6 @@ export default function Dashboard() {
             subtitle={`${stats.successfulTransactions} thành công`}
           />
         </Suspense>
-
-        <Suspense fallback={<div className="glass-card h-32 animate-pulse" />}>
-          <StatCard
-            title="Trung Bình / GD"
-            value={stats.averageTransaction}
-            isCurrency
-            icon={<span className="text-xl">📈</span>}
-            subtitle="Giá trị giao dịch TB"
-          />
-        </Suspense>
-
-        <Suspense fallback={<div className="glass-card h-32 animate-pulse" />}>
-          <StatCard
-            title="Lợi Nhuận Ước Tính"
-            value={Math.round(stats.totalRevenue * 0.12)}
-            isCurrency
-            icon={<span className="text-xl">🎯</span>}
-            subtitle="~12% biên lợi nhuận"
-          />
-        </Suspense>
       </div>
 
       {/* Charts Grid */}
@@ -145,7 +157,7 @@ export default function Dashboard() {
         </Suspense>
 
         <Suspense fallback={<div className="glass-card h-80 animate-pulse" />}>
-          <ProfitChart data={profitChartData} />
+          <ProfitChart data={expenses} />
         </Suspense>
       </div>
 

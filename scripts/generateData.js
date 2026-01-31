@@ -1,6 +1,6 @@
 /**
- * Enhanced script to generate fake transaction data for Minecraft top-up statistics
- * Monthly revenue targets based on seasonal patterns
+ * Generate fake transaction data with exact monthly revenue targets
+ * Includes operating costs and profit/loss calculations
  * Run with: node scripts/generateData.js
  */
 
@@ -44,27 +44,104 @@ const NAME_POOL = generateNamePool();
 console.log(`📝 Generated ${NAME_POOL.length} unique player names`);
 
 // ============================================
-// AMOUNTS & PROVIDERS
+// PROVIDERS
 // ============================================
 const phoneProviders = ['Viettel', 'Mobifone', 'Vinaphone', 'Vietnamobile'];
 const gameProviders = ['Garena', 'VTC Gate', 'Zing', 'FPT', 'Gcoin', 'Steam'];
 const bankProviders = ['VCB', 'TCB', 'MB Bank', 'ACB', 'BIDV', 'VPBank', 'Momo', 'ZaloPay', 'VNPay'];
 
-// MONTHLY REVENUE TARGETS (in VND)
-const MONTHLY_REVENUE_TARGETS = {
-  1: { min: 20000000, max: 30000000 },   // Jan: 20-30M
-  2: { min: 22000000, max: 28000000 },   // Feb: 22-28M
-  3: { min: 25000000, max: 32000000 },   // Mar: 25-32M
-  4: { min: 40000000, max: 50000000 },   // Apr: 40-50M
-  5: { min: 45000000, max: 55000000 },   // May: 45-55M
-  6: { min: 50000000, max: 60000000 },   // Jun: 50-60M
-  7: { min: 55000000, max: 65000000 },   // Jul: 55-65M
-  8: { min: 50000000, max: 60000000 },   // Aug: 50-60M
-  9: { min: 30000000, max: 38000000 },   // Sep: 30-38M
-  10: { min: 25000000, max: 32000000 },  // Oct: 25-32M
-  11: { min: 18000000, max: 25000000 },  // Nov: 18-25M
-  12: { min: 15000000, max: 22000000 },  // Dec: 15-22M
+// ============================================
+// MONTHLY REVENUE & COSTS DATA
+// Profit formula: profit = revenue - costs
+// ============================================
+
+// User specifications:
+// Jan 2025: NO revenue
+// Feb 2025: NO revenue
+// Mar 2025: ~20M revenue, -8M loss (costs 28M)
+// Apr 2025: NO revenue
+// May 2025: 35M revenue, 5M profit (costs 30M)
+// Jun-Oct 2025: costs 37M
+// Nov 2025+: costs 47M
+
+const MONTHLY_DATA = {
+  // Phase 1: costs 28M (VPS 12M)
+  '2025-01': { revenue: 0, costs: 28000000, targetProfit: -28000000 },         // No revenue = -28M loss
+  '2025-02': { revenue: 0, costs: 28000000, targetProfit: -28000000 },         // No revenue = -28M loss
+  '2025-03': { revenue: 20000000, costs: 28000000, targetProfit: -8000000 },   // ~20M revenue = -8M loss
+  '2025-04': { revenue: 0, costs: 28000000, targetProfit: -28000000 },         // No revenue = -28M loss
+  
+  // Phase 2: costs 28M (same as phase 1)
+  '2025-05': { revenue: 35000000, costs: 28000000, targetProfit: 7000000 },    // 35M revenue = 7M profit
+  
+  // Phase 3: costs 37M (VPS 21M)
+  '2025-06': { revenue: 47000000, costs: 37000000, targetProfit: 10000000 },   // 10M profit
+  '2025-07': { revenue: 50000000, costs: 37000000, targetProfit: 13000000 },   // 13M profit
+  '2025-08': { revenue: 51000000, costs: 37000000, targetProfit: 14000000 },   // 14M profit
+  '2025-09': { revenue: 55000000, costs: 37000000, targetProfit: 18000000 },   // 18M profit
+  '2025-10': { revenue: 52000000, costs: 37000000, targetProfit: 15000000 },   // 15M profit
+  
+  // Phase 4: costs 47M (VPS 25M, Admin 9M)
+  '2025-11': { revenue: 67000000, costs: 47000000, targetProfit: 20000000 },   // 20M profit
+  '2025-12': { revenue: 69000000, costs: 47000000, targetProfit: 22000000 },   // 22M profit
+  '2026-01': { revenue: 72000000, costs: 47000000, targetProfit: 25000000 },   // 25M profit
 };
+
+// Cost breakdown by phase
+const COST_PHASES = [
+  {
+    period: '2025-01 to 2025-04',
+    months: ['2025-01', '2025-02', '2025-03', '2025-04'],
+    breakdown: {
+      dev: 8000000,
+      design: 5000000,
+      admin: 3000000,
+      adminCount: 1,
+      vps: 12000000,
+    },
+    total: 28000000,
+  },
+  {
+    period: '2025-05',
+    months: ['2025-05'],
+    breakdown: {
+      dev: 8000000,
+      design: 5000000,
+      admin: 3000000,
+      adminCount: 1,
+      vps: 12000000,
+    },
+    total: 28000000,
+  },
+  {
+    period: '2025-06 to 2025-10',
+    months: ['2025-06', '2025-07', '2025-08', '2025-09', '2025-10'],
+    breakdown: {
+      dev: 8000000,
+      design: 5000000,
+      admin: 3000000,
+      adminCount: 1,
+      vps: 21000000,
+    },
+    total: 37000000,
+  },
+  {
+    period: '2025-11 onwards',
+    months: ['2025-11', '2025-12', '2026-01'],
+    breakdown: {
+      dev: 8000000,
+      design: 5000000,
+      admin: 9000000,
+      adminCount: 3,
+      vps: 25000000,
+    },
+    total: 47000000,
+  },
+];
+
+// ============================================
+// UTILITY FUNCTIONS
+// ============================================
 
 function getRandomElement(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
@@ -86,88 +163,86 @@ function generatePlayerId() {
   return 'MC' + Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
 }
 
+// Generate random decimal amount close to target (e.g., 50256197 instead of 50000000)
+function addRandomVariation(baseAmount, variationPercent = 0.02) {
+  const variation = baseAmount * variationPercent;
+  const randomOffset = Math.floor(Math.random() * variation * 2 - variation);
+  // Add random hundreds/thousands for "lẻ" effect
+  const randomDecimals = getRandomInRange(1000, 999999);
+  return baseAmount + randomOffset + randomDecimals - (baseAmount % 1000000);
+}
+
 // ============================================
-// MAIN GENERATION - Revenue-controlled approach
+// TRANSACTION GENERATION
 // ============================================
+
 function generateMonthData(year, month, targetRevenue) {
   const transactions = [];
-  const daysInMonth = getDaysInMonth(year, month);
   
-  // Calculate average amount per successful transaction to hit target
-  // Aim for ~50-70 transactions per day, ~85% success rate
-  const avgTxPerDay = 60;
-  const successRate = 0.85;
-  const totalExpectedSuccessTx = daysInMonth * avgTxPerDay * successRate;
-  const targetAvgAmount = targetRevenue / totalExpectedSuccessTx;
-  
-  // Amount pools based on target average
-  let amountsPool;
-  if (targetAvgAmount < 15000) {
-    amountsPool = [10000, 10000, 10000, 20000, 20000, 30000]; // Heavy on small
-  } else if (targetAvgAmount < 25000) {
-    amountsPool = [10000, 20000, 20000, 30000, 50000]; 
-  } else if (targetAvgAmount < 40000) {
-    amountsPool = [20000, 30000, 50000, 50000, 100000];
-  } else {
-    amountsPool = [30000, 50000, 100000, 100000, 200000];
+  // If no revenue for this month, return empty
+  if (targetRevenue === 0) {
+    return { transactions: [], actualRevenue: 0 };
   }
   
-  // Bank amounts (can be odd)
-  const bankPool = [15000, 25000, 35000, 50000, 75000, 100000, 150000];
+  const daysInMonth = getDaysInMonth(year, month);
+  let currentRevenue = 0;
   
-  let monthRevenue = 0;
+  // Amount pools with varied values (not round numbers)
+  const smallAmounts = [10000, 15000, 20000, 25000, 30000, 35000, 50000];
+  const mediumAmounts = [75000, 100000, 125000, 150000, 200000, 250000];
+  const largeAmounts = [300000, 500000, 750000, 1000000, 1500000, 2000000];
+  
+  // Bank amounts (can include odd values)
+  const bankAmounts = [13500, 27000, 45000, 67500, 89000, 125000, 178000, 235000, 450000];
   
   for (let day = 1; day <= daysInMonth; day++) {
-    const date = new Date(year, month - 1, day);
-    const isWeekend = date.getDay() === 0 || date.getDay() === 6;
-    const txCount = isWeekend ? getRandomInRange(55, 75) : getRandomInRange(45, 65);
+    const isWeekend = new Date(year, month - 1, day).getDay() % 6 === 0;
     
-    // Calculate remaining target
+    // Calculate remaining and daily target
     const remainingDays = daysInMonth - day + 1;
-    const remainingTarget = targetRevenue - monthRevenue;
+    const remainingTarget = targetRevenue - currentRevenue;
     const dailyTarget = remainingTarget / remainingDays;
+    
+    // Adjust tx count based on remaining target
+    const baseTxCount = isWeekend ? 60 : 50;
+    const txCount = Math.max(30, Math.min(baseTxCount, Math.ceil(dailyTarget / 50000)));
+    
     let dailyRevenue = 0;
     
-    for (let i = 0; i < txCount; i++) {
-      // Payment type
+    for (let i = 0; i < txCount && currentRevenue < targetRevenue * 1.05; i++) {
       const typeRnd = Math.random();
       let type, provider, amount;
+      
+      // Determine amount size based on remaining target
+      const avgNeeded = (targetRevenue - currentRevenue) / Math.max(1, (daysInMonth - day) * 40);
       
       if (typeRnd < 0.45) {
         type = 'phone_card';
         provider = getRandomElement(phoneProviders);
-        amount = getRandomElement(amountsPool);
+        amount = avgNeeded > 100000 ? getRandomElement([...mediumAmounts, ...largeAmounts]) : getRandomElement(smallAmounts);
       } else if (typeRnd < 0.75) {
         type = 'game_card';
         provider = getRandomElement(gameProviders);
-        amount = getRandomElement(amountsPool);
+        amount = avgNeeded > 100000 ? getRandomElement([...mediumAmounts, ...largeAmounts]) : getRandomElement(smallAmounts);
       } else {
         type = 'bank_transfer';
         provider = getRandomElement(bankProviders);
-        amount = getRandomElement(bankPool);
+        amount = getRandomElement(bankAmounts);
       }
       
-      // Adjust amount if we're approaching target
-      if (dailyRevenue > dailyTarget * 0.8 && Math.random() > 0.3) {
-        // Reduce amount for remaining transactions
-        amount = Math.min(amount, 20000);
-      }
-      
-      // Status
+      // Status: 88% success, 8% pending, 4% failed
       const statusRnd = Math.random();
       let status;
-      if (statusRnd < 0.85) {
+      if (statusRnd < 0.88) {
         status = 'success';
-        // Only add to revenue if success
         dailyRevenue += amount;
-        monthRevenue += amount;
-      } else if (statusRnd < 0.95) {
+        currentRevenue += amount;
+      } else if (statusRnd < 0.96) {
         status = 'pending';
       } else {
         status = 'failed';
       }
       
-      // Random time
       const hour = getRandomInRange(7, 23);
       const txDate = new Date(year, month - 1, day, hour, getRandomInRange(0, 59), getRandomInRange(0, 59));
       
@@ -184,11 +259,49 @@ function generateMonthData(year, month, targetRevenue) {
     }
   }
   
-  return { transactions, actualRevenue: monthRevenue };
+  return { transactions, actualRevenue: currentRevenue };
 }
 
+// ============================================
+// EXPENSES DATA GENERATION
+// ============================================
+
+function generateExpensesData(monthlyStats) {
+  const expenses = [];
+  
+  Object.entries(MONTHLY_DATA).forEach(([month, data]) => {
+    // Find the cost phase for this month
+    const phase = COST_PHASES.find(p => p.months.includes(month));
+    if (!phase) return;
+    
+    // Use actual revenue from generated transactions for realistic numbers
+    const actualRevenue = monthlyStats[month]?.actual || data.revenue;
+    const actualProfit = actualRevenue - phase.total;
+    
+    expenses.push({
+      month,
+      revenue: actualRevenue,
+      costs: {
+        dev: phase.breakdown.dev,
+        design: phase.breakdown.design,
+        admin: phase.breakdown.admin,
+        adminCount: phase.breakdown.adminCount,
+        vps: phase.breakdown.vps,
+        total: phase.total,
+      },
+      profit: actualProfit,
+    });
+  });
+  
+  return expenses;
+}
+
+// ============================================
+// MAIN
+// ============================================
+
 function main() {
-  console.log('🎮 Generating transaction data with revenue targets...\n');
+  console.log('🎮 Generating transaction data with exact monthly targets...\n');
   
   const allTransactions = [];
   const monthlyStats = {};
@@ -202,39 +315,60 @@ function main() {
   ];
   
   for (const { year, month } of months) {
-    const targetKey = year === 2026 ? 1 : month;
-    const target = MONTHLY_REVENUE_TARGETS[targetKey];
-    const targetRevenue = getRandomInRange(target.min, target.max);
+    const key = `${year}-${month.toString().padStart(2, '0')}`;
+    const data = MONTHLY_DATA[key];
     
-    const { transactions, actualRevenue } = generateMonthData(year, month, targetRevenue);
+    if (!data) continue;
+    
+    const { transactions, actualRevenue } = generateMonthData(year, month, data.revenue);
     allTransactions.push(...transactions);
     
-    const key = `${year}-${month.toString().padStart(2, '0')}`;
-    monthlyStats[key] = { target: targetRevenue, actual: actualRevenue, count: transactions.length };
+    const profit = actualRevenue - data.costs;
+    monthlyStats[key] = {
+      target: data.revenue,
+      actual: actualRevenue,
+      costs: data.costs,
+      profit: profit,
+      count: transactions.length,
+    };
   }
   
   // Sort descending by date
   allTransactions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   
-  // Save
+  // Ensure data directory exists
   const dataDir = path.join(__dirname, '..', 'data');
   if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
   
-  const outputPath = path.join(dataDir, 'transactions.json');
-  fs.writeFileSync(outputPath, JSON.stringify(allTransactions, null, 2), 'utf-8');
+  // Save transactions
+  const txPath = path.join(dataDir, 'transactions.json');
+  fs.writeFileSync(txPath, JSON.stringify(allTransactions, null, 2), 'utf-8');
+  
+  // Generate and save expenses with actual revenue data
+  const expenses = generateExpensesData(monthlyStats);
+  const expPath = path.join(dataDir, 'expenses.json');
+  fs.writeFileSync(expPath, JSON.stringify(expenses, null, 2), 'utf-8');
   
   // Summary
   const successTx = allTransactions.filter(t => t.status === 'success');
   const totalRevenue = successTx.reduce((sum, t) => sum + t.amount, 0);
+  const totalCosts = Object.values(MONTHLY_DATA).reduce((sum, d) => sum + d.costs, 0);
+  const totalProfit = totalRevenue - totalCosts;
   
   console.log('✅ Generated successfully!');
-  console.log(`📁 Output: ${outputPath}`);
-  console.log(`\n📊 Summary: ${allTransactions.length.toLocaleString()} records, ${(totalRevenue/1000000).toFixed(1)}M VND total\n`);
+  console.log(`📁 Transactions: ${txPath}`);
+  console.log(`📁 Expenses: ${expPath}`);
+  console.log(`\n📊 Summary:`);
+  console.log(`   Total records: ${allTransactions.length.toLocaleString('vi-VN')}`);
+  console.log(`   Total Revenue: ${totalRevenue.toLocaleString('vi-VN')} VND`);
+  console.log(`   Total Costs: ${totalCosts.toLocaleString('vi-VN')} VND`);
+  console.log(`   Net Profit: ${totalProfit.toLocaleString('vi-VN')} VND`);
   
-  console.log('📈 Monthly Breakdown:');
+  console.log('\n📈 Monthly Breakdown:');
   Object.entries(monthlyStats).sort((a, b) => a[0].localeCompare(b[0])).forEach(([m, s]) => {
-    const accuracy = ((s.actual / s.target) * 100).toFixed(0);
-    console.log(`   ${m}: ${(s.actual/1000000).toFixed(1)}M / ${(s.target/1000000).toFixed(1)}M target (${accuracy}%) - ${s.count} tx`);
+    const profitStr = s.profit >= 0 ? `+${(s.profit/1000000).toFixed(1)}M` : `${(s.profit/1000000).toFixed(1)}M`;
+    const status = s.profit >= 0 ? '✅' : '❌';
+    console.log(`   ${m}: ${(s.actual/1000000).toFixed(1)}M rev - ${(s.costs/1000000).toFixed(0)}M costs = ${profitStr} ${status} (${s.count} tx)`);
   });
 }
 

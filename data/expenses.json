@@ -1,0 +1,171 @@
+[
+  {
+    "month": "2025-01",
+    "revenue": 0,
+    "costs": {
+      "dev": 8000000,
+      "design": 5000000,
+      "admin": 3000000,
+      "adminCount": 1,
+      "vps": 12000000,
+      "total": 28000000
+    },
+    "profit": -28000000
+  },
+  {
+    "month": "2025-02",
+    "revenue": 0,
+    "costs": {
+      "dev": 8000000,
+      "design": 5000000,
+      "admin": 3000000,
+      "adminCount": 1,
+      "vps": 12000000,
+      "total": 28000000
+    },
+    "profit": -28000000
+  },
+  {
+    "month": "2025-03",
+    "revenue": 21086500,
+    "costs": {
+      "dev": 8000000,
+      "design": 5000000,
+      "admin": 3000000,
+      "adminCount": 1,
+      "vps": 12000000,
+      "total": 28000000
+    },
+    "profit": -6913500
+  },
+  {
+    "month": "2025-04",
+    "revenue": 0,
+    "costs": {
+      "dev": 8000000,
+      "design": 5000000,
+      "admin": 3000000,
+      "adminCount": 1,
+      "vps": 12000000,
+      "total": 28000000
+    },
+    "profit": -28000000
+  },
+  {
+    "month": "2025-05",
+    "revenue": 36792000,
+    "costs": {
+      "dev": 8000000,
+      "design": 5000000,
+      "admin": 3000000,
+      "adminCount": 1,
+      "vps": 12000000,
+      "total": 28000000
+    },
+    "profit": 8792000
+  },
+  {
+    "month": "2025-06",
+    "revenue": 48760500,
+    "costs": {
+      "dev": 8000000,
+      "design": 5000000,
+      "admin": 3000000,
+      "adminCount": 1,
+      "vps": 21000000,
+      "total": 37000000
+    },
+    "profit": 11760500
+  },
+  {
+    "month": "2025-07",
+    "revenue": 50555000,
+    "costs": {
+      "dev": 8000000,
+      "design": 5000000,
+      "admin": 3000000,
+      "adminCount": 1,
+      "vps": 21000000,
+      "total": 37000000
+    },
+    "profit": 13555000
+  },
+  {
+    "month": "2025-08",
+    "revenue": 53635500,
+    "costs": {
+      "dev": 8000000,
+      "design": 5000000,
+      "admin": 3000000,
+      "adminCount": 1,
+      "vps": 21000000,
+      "total": 37000000
+    },
+    "profit": 16635500
+  },
+  {
+    "month": "2025-09",
+    "revenue": 57449500,
+    "costs": {
+      "dev": 8000000,
+      "design": 5000000,
+      "admin": 3000000,
+      "adminCount": 1,
+      "vps": 21000000,
+      "total": 37000000
+    },
+    "profit": 20449500
+  },
+  {
+    "month": "2025-10",
+    "revenue": 53557500,
+    "costs": {
+      "dev": 8000000,
+      "design": 5000000,
+      "admin": 3000000,
+      "adminCount": 1,
+      "vps": 21000000,
+      "total": 37000000
+    },
+    "profit": 16557500
+  },
+  {
+    "month": "2025-11",
+    "revenue": 69094000,
+    "costs": {
+      "dev": 8000000,
+      "design": 5000000,
+      "admin": 9000000,
+      "adminCount": 3,
+      "vps": 25000000,
+      "total": 47000000
+    },
+    "profit": 22094000
+  },
+  {
+    "month": "2025-12",
+    "revenue": 71517000,
+    "costs": {
+      "dev": 8000000,
+      "design": 5000000,
+      "admin": 9000000,
+      "adminCount": 3,
+      "vps": 25000000,
+      "total": 47000000
+    },
+    "profit": 24517000
+  },
+  {
+    "month": "2026-01",
+    "revenue": 73611000,
+    "costs": {
+      "dev": 8000000,
+      "design": 5000000,
+      "admin": 9000000,
+      "adminCount": 3,
+      "vps": 25000000,
+      "total": 47000000
+    },
+    "profit": 26611000
+  }
+]

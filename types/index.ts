@@ -1,5 +1,3 @@
-// Transaction data types for Minecraft top-up statistics dashboard
-
 export type PaymentType = 'phone_card' | 'game_card' | 'bank_transfer';
 export type TransactionStatus = 'success' | 'pending' | 'failed';
 
@@ -25,13 +23,13 @@ export interface PaginationState {
     page: number;
     itemsPerPage: number;
     totalItems: number;
+    totalPages: number;
 }
 
 export interface StatsSummary {
     totalRevenue: number;
     totalTransactions: number;
     successfulTransactions: number;
-    failedTransactions: number;
     averageTransaction: number;
     revenueByType: Record<PaymentType, number>;
 }
@@ -39,15 +37,45 @@ export interface StatsSummary {
 export interface ChartDataPoint {
     date: string;
     revenue: number;
-    transactions: number;
+    transactions?: number;
     phone_card?: number;
     game_card?: number;
     bank_transfer?: number;
 }
 
-export interface MonthlyProfitData {
+// Cost breakdown interface
+export interface CostBreakdown {
+    dev: number;
+    design: number;
+    admin: number;
+    adminCount: number;
+    vps: number;
+    total: number;
+}
+
+// Monthly expense record
+export interface MonthlyExpense {
     month: string;
     revenue: number;
+    costs: CostBreakdown;
     profit: number;
+}
+
+// Profit/Loss summary
+export interface ProfitLossSummary {
+    month: string;
+    revenue: number;
+    costs: number;
+    profit: number;
+    isProfit: boolean;
     growth: number;
+}
+
+// Overall summary
+export interface OverallSummary {
+    totalRevenue: number;
+    totalCosts: number;
+    netProfit: number;
+    profitableMonths: number;
+    lossMonths: number;
 }
