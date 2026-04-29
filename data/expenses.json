@@ -167,5 +167,44 @@
       "total": 47000000
     },
     "profit": 31421500
+  },
+  {
+    "month": "2026-02",
+    "revenue": 61847000,
+    "costs": {
+      "dev": 8000000,
+      "design": 5000000,
+      "admin": 9000000,
+      "adminCount": 3,
+      "vps": 25000000,
+      "total": 47000000
+    },
+    "profit": 14847000
+  },
+  {
+    "month": "2026-03",
+    "revenue": 62538500,
+    "costs": {
+      "dev": 8000000,
+      "design": 5000000,
+      "admin": 9000000,
+      "adminCount": 3,
+      "vps": 25000000,
+      "total": 47000000
+    },
+    "profit": 15538500
+  },
+  {
+    "month": "2026-04",
+    "revenue": 61213500,
+    "costs": {
+      "dev": 8000000,
+      "design": 5000000,
+      "admin": 9000000,
+      "adminCount": 3,
+      "vps": 25000000,
+      "total": 47000000
+    },
+    "profit": 14213500
   }
 ]
